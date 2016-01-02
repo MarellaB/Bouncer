@@ -11,7 +11,9 @@ var score = 0,
     multipler = 1,
     ballRadius = 10,
     ballPosX = (canv.width / 2),
-    ballPosY = (canv.height - ballRadius);
+    ballPosY = (canv.height - ballRadius),
+    dx = 1,
+    dy = -1;
 
 var platform = {
   posX: 'left',
@@ -37,8 +39,17 @@ platforms.push(platform)
 
 //All logic
 function tick() {
-  ballPosX += 0;
-  ballPosY += 0;
+  ballPosX += dx;
+  ballPosY += dy;
+
+  if ((ballPosX + ballRadius) > canv.width || (ballPosX - ballRadius) < 0) {
+    dx = -dx;
+  }
+
+  if ((ballPosY + ballRadius) > canv.height || (ballPosY - ballRadius) < 0) {
+    dy = -dy;
+  }
+
 }
 
 /**
