@@ -12,6 +12,9 @@ var score     = 0,
     ballPosX  = 0,
     ballPosY  = 0,
     camera    = 100;
+    ballRadius = 10,
+    ballPosX = (canv.width / 2),
+    ballPosY = (canv.height - ballRadius);
 
 var platform = {
   posX: 'left',
@@ -29,9 +32,9 @@ var platform = {
   tick() {
 
   }
-}
+};
 
-var platforms = Array();
+var platforms = [];
 
 var temp = platform;
 temp.posX = 'middle';
@@ -45,17 +48,38 @@ platforms.push(temp);
 
 //All logic
 function tick() {
+  ballPosX += 0;
+  ballPosY += 0;
+}
 
+/**
+ * Draw the ball. Defaults to the bottom center of the screen.
+ */
+function drawBall() {
+  $.beginPath();
+  $.arc(ballPosX, ballPosY, ballRadius, 0, Math.PI * 2, false);
+  $.fillStyle = "#FF0000";
+  $.fill();
+  $.closePath();
+}
+
+/**
+ * Draw the bricks.
+ */
+function drawBricks() {
+  for (var i=0; i<platforms.length; i++) {
+    platforms[i].render();
+    console.log(platforms[i].posY);
+  }
 }
 
 //All rendering
 function draw() {
   $.fillStyle = "#000";
+  // Clear canvas
   $.fillRect(0, 0, canv.width, canv.height);
-  for (var i=0; i<platforms.length; i++) {
-    platforms[i].render();
-    console.log(platforms[i].posY);
-  }
+  drawBall();
+  drawBricks();
 }
 
 //Two loops
