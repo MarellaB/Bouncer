@@ -3,42 +3,88 @@ var canv = document.getElementById('primeCanvas'),
     $    = canv.getContext('2d');
 
 //Elements of page to be modified
-var scoreEl = document.getElementById('score'),
-    multiplierEl = document.getElementById('multipler');
+var scoreEl      = document.getElementById('score'),
+    multiplierEl = document.getElementById('multiplier');
 
 //Inner variables of game
-var score = 0,
-    multipler = 1,
+var score     = 0,
+    multiplier = 2,
+    ballPosX  = 0,
+    ballPosY  = 0,
+    camera    = 0;
     ballRadius = 10,
     ballPosX = (canv.width / 2),
     ballPosY = (canv.height - ballRadius);
 
-var platform = {
-  posX: 'left',
-  posY: 0,
-  render() {
+var platform = function(arg1) {
+  this.style = arg1;
+  this.posY = 0;
+  this.render = function() {
     $.fillStyle = "#f0f";
-    if (this.posX === 'left') {
-      $.fillRect(0,this.posY,50, 15);
-    } else if (this.posX === 'middle') {
-      $.fillRect(75,this.posY,50, 15);
-    } else if (this.posX === 'right') {
-      $.fillRect(150,this.posY,50, 15);
-    }
-  },
-  tick() {
+    var c = this.style.split('');
+    for (var i=0; i<3; i++) {
+      if (c[i] === '#') {
+        $.fillRect((canv.width/16)+((canv.width/4)*i), this.posY+camera, (canv.width/4), 20);
+      } else {
 
-  }
+      }
+    }
+  };
+  this.generate = function () {
+    var t = '';
+    var check = false;
+    for (var i=0; i<2; i++) {
+      var a = Math.random();
+      if (a > 0.4) {
+        a = '#';
+      } else {
+        a = '0';
+        if (!check) {
+          i -= 1;
+          check = true;
+        }
+      }
+      t = t.concat(a);
+    }
+    this.style = t;
+    if (this.style === '000') {
+      this.style = '#0#';
+    }
+    console.log(t);
+  };
+  this.tick = function() {
+    if (this.posY + camera - 20 > canv.height) {
+      this.generate();
+      this.posY = 0-camera-40;
+    }
+  };
 };
 
+//List of platforms in the game
 var platforms = [];
 
-platforms.push(platform)
+//Creates temporary testing platforms
+var temp = new platform();
+temp.generate();
+platforms.push(temp);
+temp = new platform();
+temp.posY = 210;
+temp.generate();
+platforms.push(temp);
+temp = new platform();
+temp.posY = 360;
+temp.generate();
+platforms.push(temp);
 
 //All logic
 function tick() {
   ballPosX += 0;
   ballPosY += 0;
+  camera += 1;
+  score += 0.04 * multiplier;
+  for (var i=0; i<platforms.length; i++) {
+    platforms[i].tick();
+  }
 }
 
 /**
@@ -63,10 +109,14 @@ function drawBricks() {
 
 //All rendering
 function draw() {
-  // Clear canvas
-  $.clearRect(0, 0, canv.width, canv.height);
+  // Draw background
+  $.fillStyle = "#000";
+  $.fillRect(0, 0, canv.width, canv.height);
   drawBall();
   drawBricks();
+  //Updates the elements to display the proper multipler and score
+  scoreEl.innerHTML = '' + Math.floor(score);
+  multiplierEl.innerHTML = 'x' + multiplier;
 }
 
 //Two loops
