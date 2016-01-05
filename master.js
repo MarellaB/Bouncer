@@ -8,12 +8,7 @@ var scoreEl = document.getElementById('score'),
 
 //Inner variables of game
 var score = 0,
-    multipler = 1,
-    ballRadius = 10,
-    ballPosX = (canv.width / 2),
-    ballPosY = (canv.height - ballRadius),
-    dx = 1,
-    dy = -1;
+    multipler = 1;
 
 var platform = {
   posX: 'left',
@@ -33,35 +28,55 @@ var platform = {
   }
 };
 
+function Ball(x, y, radius, color) {
+  this.x = x;
+  this.y = y;
+  this.radius = radius;
+  this.color = color;
+  this.dx = 1;
+  this.dy = -1;
+  this.draw = function() {
+    $.beginPath();
+    $.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    $.fillStyle = this.color;
+    $.fill();
+    $.closePath();
+  };
+}
+
 var platforms = [];
+var balls = [
+  new Ball((canv.width / 2), (canv.height - 10), 10, "#FF0000"),
+  new Ball(200, 200, 20, "#00FF00"),
+  new Ball(400, 560, 40, "#0000FF")
+];
 
 platforms.push(platform)
 
 //All logic
 function tick() {
-  ballPosX += dx;
-  ballPosY += dy;
+  for (var i = 0; i < balls.length; i++) {
+    balls[i].x += balls[i].dx;
+    balls[i].y += balls[i].dy;
 
-  if ((ballPosX + ballRadius) > canv.width || (ballPosX - ballRadius) < 0) {
-    dx = -dx;
+    if ((balls[i].x + balls[i].radius) > canv.width || (balls[i].x - balls[i].radius) < 0) {
+      balls[i].dx = -(balls[i].dx);
+    }
+
+    if ((balls[i].y + balls[i].radius) > canv.height || (balls[i].y - balls[i].radius) < 0) {
+      balls[i].dy = -(balls[i].dy);
+    }
   }
-
-  if ((ballPosY + ballRadius) > canv.height || (ballPosY - ballRadius) < 0) {
-    dy = -dy;
-  }
-
 }
 
-/**
- * Draw the ball. Defaults to the bottom center of the screen.
+/*
+ * Draw the balls.
  */
-function drawBall() {
-  $.beginPath();
-  $.arc(ballPosX, ballPosY, ballRadius, 0, Math.PI * 2, false);
-  $.fillStyle = "#FF0000";
-  $.fill();
-  $.closePath();
-}
+ function drawBalls() {
+   for (var i = 0; i < balls.length; i++) {
+     balls[i].draw();
+   }
+ }
 
 /**
  * Draw the bricks.
@@ -76,8 +91,9 @@ function drawBricks() {
 function draw() {
   // Clear canvas
   $.clearRect(0, 0, canv.width, canv.height);
-  drawBall();
+
   drawBricks();
+    drawBalls();
 }
 
 //Two loops
