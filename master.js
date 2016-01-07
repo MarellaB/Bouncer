@@ -7,26 +7,39 @@ var scoreEl      = document.getElementById('score'),
     multiplierEl = document.getElementById('multiplier');
 
 //Inner variables of game
-var score       = 0,
-    multiplier  = 2,
-    camera      = 0;
+var score       = 0,                          //Players score
+    multiplier  = 2,                          //Score multiplier
+    cameraX   = 0,                          //Position of the camera on X axis
+    cameraY   = 0,                          //Position of the camera on Y axis
+    cameraS   = 1,                          //Speed and direction of the camera
+    ballRadius= 10,                         //Size of the ball
+    ballPosX  = (canv.width / 2),           //Position of the ball on X axis
+    ballPosY  = (canv.height - ballRadius), //Position of the ball on Y axis
+    oldBricks = '',                         //Used to store and read old bricks
+    fall      = false;                      //If the game is in fall mode or not
 
-var platform = function(arg1) {
-  this.style = arg1;
-  this.posY = 0;
-
+/**
+  * The full section of bricks
+ */
+var platform = function() {
+  this.style = '';  //Where the bricks are located
+  this.posY = 0;    //Position on the Y axis of the bricks
+  //All rendering of the bricks in here
   this.render = function() {
     $.fillStyle = "#f0f";
     var c = this.style.split('');
     for (var i=0; i<3; i++) {
       if (c[i] === '#') {
-        $.fillRect((canv.width/16)+((canv.width/4)*i), this.posY+camera, (canv.width/4), 20);
+        $.fillRect((canv.width/16)+((canv.width/16)*4.6666*i), this.posY+cameraY, (canv.width/16)*4.6666, 20);
       } else {
 
       }
     }
   };
 
+  //Generates new positions of the bricks
+  //NOTE: Should only be used when going up, pull from oldBricks when going down,
+  //      and make sure to pull it, and not just read it
   this.generate = function () {
     var t = '';
     var check = false;
@@ -43,16 +56,25 @@ var platform = function(arg1) {
       }
       t = t.concat(a);
     }
-    this.style = t;
-    if (this.style === '000') {
-      this.style = '#0#';
+    if (t === '000') {
+      t = '#0#';
     }
+    if (t === '##') {
+      t = '##0';
+    }
+    this.style = t;
     console.log(t);
   };
   this.tick = function() {
-    if (this.posY + camera - 20 > canv.height) {
+    if (this.posY + cameraY - 20 > canv.height && !fall) {
+      oldBricks = oldBricks.concat(this.style);
       this.generate();
-      this.posY = 0-camera-40;
+      this.posY = 0-cameraY-40;
+    }
+    if (this.posY + cameraY < -20 && fall) {
+      this.style = oldBricks.slice(-3, oldBricks.length);
+      this.posY = canv.height-cameraY;
+      console.log(this.style);
     }
   };
 };
@@ -85,17 +107,22 @@ var temp = new platform();
 temp.generate();
 platforms.push(temp);
 temp = new platform();
-temp.posY = 210;
+temp.posY = canv.height/3+canv.height/3;
 temp.generate();
 platforms.push(temp);
 temp = new platform();
-temp.posY = 360;
+temp.posY = canv.height/3;
 temp.generate();
 platforms.push(temp);
 
 //All logic
 function tick() {
-  camera += 1;
+  if (fall && cameraS > -1) {
+    cameraS -= 0.002;
+  }
+  ballPosX += 0;
+  ballPosY += 0;
+  cameraY += cameraS;
   score += 0.04 * multiplier;
   for (var i=0; i<platforms.length; i++) {
     platforms[i].tick();
@@ -105,7 +132,7 @@ function tick() {
     balls[i].x += balls[i].dx;
     balls[i].y += balls[i].dy;
 
-    if ((balls[i].x + balls[i].radius) > canv.width || (balls[i].x - balls[i].radius) < 0) {
+    if ((balls[i].x + balls[i].radius) > canv.width-(canv.width/16) || (balls[i].x - balls[i].radius) < canv.width/16) {
       balls[i].dx = -(balls[i].dx);
     }
 
@@ -115,6 +142,13 @@ function tick() {
   }
 }
 
+//Tell the game to begin the fall sequence
+function beginFall() {
+  fall = true;
+}
+
+/**
+ * Draw the ball. Defaults to the bottom center of the screen.
 /*
  * Draw the balls.
  */
@@ -133,15 +167,22 @@ function drawBricks() {
   }
 }
 
+function drawBackground() {
+  //Draw black background
+  $.fillStyle = "#000";
+  $.fillRect(0, 0, canv.width, canv.height);
+  $.fillStyle = "#555";
+  $.fillRect(0, 0, canv.width/16, canv.height);
+  $.fillRect((canv.width/16)*15, 0, canv.width/16, canv.height);
+}
+
 //All rendering
 function draw() {
   // Clear canvas
   $.clearRect(0, 0, canv.width, canv.height);
 
   // Draw background
-  $.fillStyle = "#000";
-  $.fillRect(0, 0, canv.width, canv.height);
-
+  drawBackground();
   //Updates the elements to display the proper multipler and score
   scoreEl.innerHTML = '' + Math.floor(score);
   multiplierEl.innerHTML = 'x' + multiplier;
