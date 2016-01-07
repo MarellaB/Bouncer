@@ -186,7 +186,6 @@ function draw() {
   //Updates the elements to display the proper multipler and score
   scoreEl.innerHTML = '' + Math.floor(score);
   multiplierEl.innerHTML = 'x' + multiplier;
-
   drawBricks();
   drawBalls();
 }
