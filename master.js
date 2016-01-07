@@ -7,18 +7,14 @@ var scoreEl      = document.getElementById('score'),
     multiplierEl = document.getElementById('multiplier');
 
 //Inner variables of game
-var score     = 0,
-    multiplier = 2,
-    ballPosX  = 0,
-    ballPosY  = 0,
-    camera    = 0;
-    ballRadius = 10,
-    ballPosX = (canv.width / 2),
-    ballPosY = (canv.height - ballRadius);
+var score       = 0,
+    multiplier  = 2,
+    camera      = 0;
 
 var platform = function(arg1) {
   this.style = arg1;
   this.posY = 0;
+
   this.render = function() {
     $.fillStyle = "#f0f";
     var c = this.style.split('');
@@ -30,6 +26,7 @@ var platform = function(arg1) {
       }
     }
   };
+
   this.generate = function () {
     var t = '';
     var check = false;
@@ -60,8 +57,28 @@ var platform = function(arg1) {
   };
 };
 
-//List of platforms in the game
+function Ball(x, y, radius, color) {
+  this.x = x;
+  this.y = y;
+  this.radius = radius;
+  this.color = color;
+  this.dx = 1;
+  this.dy = -1;
+  this.draw = function() {
+    $.beginPath();
+    $.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    $.fillStyle = this.color;
+    $.fill();
+    $.closePath();
+  };
+}
+
 var platforms = [];
+var balls = [
+  new Ball((canv.width / 2), (canv.height - 10), 10, "#FF0000"),
+  new Ball(200, 200, 20, "#00FF00"),
+  new Ball(400, 560, 40, "#0000FF")
+];
 
 //Creates temporary testing platforms
 var temp = new platform();
@@ -78,25 +95,34 @@ platforms.push(temp);
 
 //All logic
 function tick() {
-  ballPosX += 0;
-  ballPosY += 0;
   camera += 1;
   score += 0.04 * multiplier;
   for (var i=0; i<platforms.length; i++) {
     platforms[i].tick();
   }
+
+  for (var i = 0; i < balls.length; i++) {
+    balls[i].x += balls[i].dx;
+    balls[i].y += balls[i].dy;
+
+    if ((balls[i].x + balls[i].radius) > canv.width || (balls[i].x - balls[i].radius) < 0) {
+      balls[i].dx = -(balls[i].dx);
+    }
+
+    if ((balls[i].y + balls[i].radius) > canv.height || (balls[i].y - balls[i].radius) < 0) {
+      balls[i].dy = -(balls[i].dy);
+    }
+  }
 }
 
-/**
- * Draw the ball. Defaults to the bottom center of the screen.
+/*
+ * Draw the balls.
  */
-function drawBall() {
-  $.beginPath();
-  $.arc(ballPosX, ballPosY, ballRadius, 0, Math.PI * 2, false);
-  $.fillStyle = "#FF0000";
-  $.fill();
-  $.closePath();
-}
+ function drawBalls() {
+   for (var i = 0; i < balls.length; i++) {
+     balls[i].draw();
+   }
+ }
 
 /**
  * Draw the bricks.
@@ -109,14 +135,19 @@ function drawBricks() {
 
 //All rendering
 function draw() {
+  // Clear canvas
+  $.clearRect(0, 0, canv.width, canv.height);
+
   // Draw background
   $.fillStyle = "#000";
   $.fillRect(0, 0, canv.width, canv.height);
-  drawBall();
-  drawBricks();
+
   //Updates the elements to display the proper multipler and score
   scoreEl.innerHTML = '' + Math.floor(score);
   multiplierEl.innerHTML = 'x' + multiplier;
+
+  drawBricks();
+  drawBalls();
 }
 
 //Two loops
