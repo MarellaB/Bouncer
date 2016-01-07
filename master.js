@@ -7,8 +7,8 @@ var scoreEl      = document.getElementById('score'),
     multiplierEl = document.getElementById('multiplier');
 
 //Inner variables of game
-var score     = 0,                          //Players score
-    multiplier= 2,                          //Score multiplier
+var score       = 0,                          //Players score
+    multiplier  = 2,                          //Score multiplier
     cameraX   = 0,                          //Position of the camera on X axis
     cameraY   = 0,                          //Position of the camera on Y axis
     cameraS   = 1,                          //Speed and direction of the camera
@@ -36,6 +36,7 @@ var platform = function() {
       }
     }
   };
+
   //Generates new positions of the bricks
   //NOTE: Should only be used when going up, pull from oldBricks when going down,
   //      and make sure to pull it, and not just read it
@@ -78,8 +79,28 @@ var platform = function() {
   };
 };
 
-//List of platforms in the game
+function Ball(x, y, radius, color) {
+  this.x = x;
+  this.y = y;
+  this.radius = radius;
+  this.color = color;
+  this.dx = 1;
+  this.dy = -1;
+  this.draw = function() {
+    $.beginPath();
+    $.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    $.fillStyle = this.color;
+    $.fill();
+    $.closePath();
+  };
+}
+
 var platforms = [];
+var balls = [
+  new Ball((canv.width / 2), (canv.height - 10), 10, "#FF0000"),
+  new Ball(200, 200, 20, "#00FF00"),
+  new Ball(400, 560, 40, "#0000FF")
+];
 
 //Creates temporary testing platforms
 var temp = new platform();
@@ -106,6 +127,19 @@ function tick() {
   for (var i=0; i<platforms.length; i++) {
     platforms[i].tick();
   }
+
+  for (var i = 0; i < balls.length; i++) {
+    balls[i].x += balls[i].dx;
+    balls[i].y += balls[i].dy;
+
+    if ((balls[i].x + balls[i].radius) > canv.width || (balls[i].x - balls[i].radius) < 0) {
+      balls[i].dx = -(balls[i].dx);
+    }
+
+    if ((balls[i].y + balls[i].radius) > canv.height || (balls[i].y - balls[i].radius) < 0) {
+      balls[i].dy = -(balls[i].dy);
+    }
+  }
 }
 
 //Tell the game to begin the fall sequence
@@ -115,14 +149,14 @@ function beginFall() {
 
 /**
  * Draw the ball. Defaults to the bottom center of the screen.
+/*
+ * Draw the balls.
  */
-function drawBall() {
-  $.beginPath();
-  $.arc(ballPosX, ballPosY, ballRadius, 0, Math.PI * 2, false);
-  $.fillStyle = "#FF0000";
-  $.fill();
-  $.closePath();
-}
+ function drawBalls() {
+   for (var i = 0; i < balls.length; i++) {
+     balls[i].draw();
+   }
+ }
 
 /**
  * Draw the bricks.
@@ -144,6 +178,9 @@ function drawBackground() {
 
 //All rendering
 function draw() {
+  // Clear canvas
+  $.clearRect(0, 0, canv.width, canv.height);
+
   // Draw background
 drawBackground();
   drawBall();
@@ -151,6 +188,9 @@ drawBackground();
   //Updates the elements to display the proper multipler and score
   scoreEl.innerHTML = '' + Math.floor(score);
   multiplierEl.innerHTML = 'x' + multiplier;
+
+  drawBricks();
+  drawBalls();
 }
 
 //Two loops
