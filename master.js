@@ -9,6 +9,8 @@ var scoreEl      = document.getElementById('score'),
 //Inner variables of game
 var score     = 0,
     multipler = 1,
+    ballPosX  = 0,
+    ballPosY  = 0,
     camera    = 100;
     ballRadius = 10,
     ballPosX = (canv.width / 2),
@@ -57,7 +59,15 @@ var balls = [
   new Ball(400, 560, 40, "#0000FF")
 ];
 
-platforms.push(platform);
+var temp = platform;
+temp.posX = 'middle';
+platforms.push(temp);
+temp.posX = 'left';
+temp.posY = 200;
+platforms.push(temp);
+temp.posX = 'right';
+temp.posY = 400;
+platforms.push(temp);
 
 //All logic
 function tick() {
@@ -98,7 +108,6 @@ function drawBricks() {
 function draw() {
   $.fillStyle = "#000";
   $.fillRect(0, 0, canv.width, canv.height);
-
   drawBricks();
   drawBalls();
 }
