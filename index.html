@@ -7,17 +7,24 @@
     <style media="screen">
       body {
         color: #d9d9d9;
+        text-align: center;
       }
       .inline {
         display: inline-block;
         position: absolute;
       }
+      #score {
+        margin-left: 20px;
+      }
+      #multiplier {
+        margin-left: 120px;
+      }
     </style>
   </head>
   <body>
     <h2 id="score" class="inline">00000</h2>
-    <h2 id="multiplier" class="inline"></h2>
-    <canvas id="primeCanvas" height="800" width="600">
+    <h2 id="multiplier" class="inline">x 1</h2>
+    <canvas id="primeCanvas" height="500" width="300">
       App Unavailable
     </canvas>
     <script src="master.js" charset="utf-8"></script>
