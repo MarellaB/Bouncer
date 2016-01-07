@@ -132,7 +132,7 @@ function tick() {
     balls[i].x += balls[i].dx;
     balls[i].y += balls[i].dy;
 
-    if ((balls[i].x + balls[i].radius) > canv.width || (balls[i].x - balls[i].radius) < 0) {
+    if ((balls[i].x + balls[i].radius) > canv.width-(canv.width/16) || (balls[i].x - balls[i].radius) < canv.width/16) {
       balls[i].dx = -(balls[i].dx);
     }
 
@@ -182,9 +182,7 @@ function draw() {
   $.clearRect(0, 0, canv.width, canv.height);
 
   // Draw background
-drawBackground();
-  drawBall();
-  drawBricks();
+  drawBackground();
   //Updates the elements to display the proper multipler and score
   scoreEl.innerHTML = '' + Math.floor(score);
   multiplierEl.innerHTML = 'x' + multiplier;
